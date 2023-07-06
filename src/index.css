@@ -1,0 +1,29 @@
+html {
+    font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+    background: #1e1e1e;
+    color: #ffffff;
+    margin: 0;
+}
+
+#main {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+#option {
+    height: 200px;
+}
+
+#logview {
+    flex-grow: 1;
+    overflow-y: scroll;
+    height: 100px;
+}
+
+#log {
+    height: 100%;
+}

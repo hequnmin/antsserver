@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <!-- https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'"/>
+    <meta http-equiv="X-Content-Security-Policy" content="default-src 'self'; script-src 'self'"/>
+    <title>Blueway ATE 2020 Simulator</title>
+    <link rel="stylesheet" type="text/css" href="./index.css">
+  </head>
+  <body>
+    <div id="main">
+      
+      <div id="option">
+        <h1>Blueway ATE 2020 Simulator</h1>
+        <div>
+            Node.js <span id="node-version"></span>,
+            Chromium <span id="chrome-version"></span>,
+            Electron <span id="electron-version"></span>.
+        </div>
+        <div>
+          <input id="txtHost" type="text" placeholder="IP地址" value="127.0.0.1" />
+        </div>
+        <div>
+          <input id="txtPortFrom" type="text" placeholder="起始端口" value="10001" />
+          <input id="txtPortTo" type="text" placeholder="结束端口" value="10012" />
+        </div>
+        <div>
+          <button id="btnServiceStart" type="button">开启</button>
+          <button id="btnServiceStop" type="button" disabled>停止</button>
+          <button id="btnLogClear" type="button">清除日志</button>
+        </div>
+      </div>
+      <div id="logview">
+        <div id="log"></div>
+      </div>
+    </div>
+  </body>
+  <script src="./index.js"></script>
+</html>
