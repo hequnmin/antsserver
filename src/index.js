@@ -12,7 +12,7 @@ const txtPortFrom = document.getElementById('txtPortFrom');
 const txtPortTo = document.getElementById('txtPortTo');
 
 
-// 将console.log打印至页面
+const logView = document.getElementById('logview');
 const logger = document.getElementById('log');
 console.log = function (message) {
     if (typeof message == 'object') {
