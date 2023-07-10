@@ -22,11 +22,11 @@ console.log = function (message) {
     }
 }
 
-console.error = function (message) {
-    if (typeof message == 'object') {
-        logger.innerHTML += '<font color="#FF0000">' + (JSON && JSON.stringify ? JSON.stringify(message) : message) + '</font><br />';
+console.error = function (err) {
+    if (typeof err == 'object') {
+        logger.innerHTML += '<font color="#FF0000">' + (JSON && JSON.stringify ? JSON.stringify(err) : err) + '</font><br />';
     } else {
-        logger.innerHTML += '<font color="#FF0000">' + message + '</font><br />';
+        logger.innerHTML += '<font color="#FF0000">' + err + '</font><br />';
     }
 }
 
@@ -41,68 +41,50 @@ _start.addEventListener('click', () => {
     const portFrom = parseInt(txtPortFrom.value);
     const portTo = parseInt(txtPortTo.value);
 
-    // const args = [
-    //     { host: '127.0.0.1', port: 10001 },
-    //     { host: '127.0.0.1', port: 10002 },
-    //     { host: '127.0.0.1', port: 10003 },
-    //     { host: '127.0.0.1', port: 10004 }];
+    allowEdit(false);
 
     let args = [];
     for (let index = portFrom; index <= portTo; index++) {
-        args = [ ... args, { host, port: index }];      
+        let arg = { host, port: index };
+        args = [ ... args, arg];
     }
-    
-    //window.serviceAPI.start(args);  //主进程到渲染器进程（单向）
-    const promise = window.serviceAPI.start(args);  //（双向）
-    
-    promise.then(results => {
-        _start.disabled = true;
-        _stop.disabled = false;
 
-        txtHost.disabled = true;
-        txtPortFrom.disabled = true;
-        txtPortTo.disabled = true;
+    const promise = window.serviceAPI.start(args);
+    promise.then(result => {
+        const msg = `服务启动...`
+        console.log(msg);
+    }).catch(error => {
+        const err = `服务启动失败！`;
+        console.error(error);
+        allowEdit(ture);
+    });    
 
-        results.forEach(result => {
-            if (result.error <= 0 && result.listen === 1) {
-                const msg = `${result.host}:${result.port} 开启监听...`;
-                console.log(msg);
-            } else {
-                const msg = `${result.host}:${result.port} 开启失败！错误代码：${result.error}`;
-                console.error(msg);
-            }
-        });
-    }).catch(err => {
-            const msg = `服务开启失败！${err}`;
-            console.error(msg);
-        });
-    });
+});
+
+function allowEdit(allow) {
+    _start.disabled = !allow;
+    _stop.disabled = allow;
+
+    txtHost.disabled = !allow;
+    txtPortFrom.disabled = !allow;
+    txtPortTo.disabled = !allow;
+}
+
 
 _stop.addEventListener('click', () => {
-    const args = [];
-
-    const promise = window.serviceAPI.stop(args);
+    const promise = window.serviceAPI.stop();
     promise.then(results => {
-        _start.disabled = false;
-        _stop.disabled = true;
-
-        txtHost.disabled = false;
-        txtPortFrom.disabled = false;
-        txtPortTo.disabled = false;
-
-        results.forEach(result => {
-            if (result.error <= 0 && result.listen === 0) {
-                const msg = `${result.host}:${result.port} 关闭监听...`;
-                console.log(msg);
-            } else {
-                const msg = `${result.host}:${result.port} 关闭失败！错误代码：${result.error}`;
-                console.error(msg);
-            }
-        });
+        if (results) {
+            const msg = `服务停止`;
+            console.log(msg);
+        }
     }).catch(err => {
-        const msg = `服务关闭失败！${err}`;
+        const msg = `服务停止失败！${err}`;
         console.log(msg);
     });
+
+    allowEdit(true);
+
 });
 
 _logClear.addEventListener('click', () => {
@@ -113,3 +95,6 @@ window.serviceAPI.message((event, value) => {
     console.log(value);
 });
 
+window.serviceAPI.error((event, value) => {
+    console.error(value);
+});

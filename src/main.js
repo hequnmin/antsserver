@@ -6,7 +6,6 @@ const path = require('path');
 const { request } = require('http');
 
 let win;
-let SOCKETS = [];
 let SERVERS = [];
 
 const createWindow = () => {
@@ -19,6 +18,9 @@ const createWindow = () => {
     });
 
     win.loadFile(path.join(__dirname, 'index.html'));
+    win.maximize();
+
+    win.webContents.openDevTools();
 
 }
 
@@ -44,43 +46,65 @@ app.whenReady().then(() => {
 
     async function handleServiceStart(event, args) {
 
-        SOCKETS = [];
-        SERVERS = [];
-        args.forEach(s => {
+        args.forEach(arg => {
+            const now = new Date();
             const server = net.createServer();
-            server.listen(s.port, s.host);
-            SOCKETS = [...SOCKETS, { ...s, listen: 1, error: 0 }];
-            server.on('connection', (socket) => connection(socket));
-            SERVERS.push(server);
-            
+            serverListen(arg).then(result => {
+                if (result) {
+                    const msg = `${formatTime(now)} ${arg.host}:${arg.port} 监听开始...`;
+                    win.webContents.send('message', msg);
+                }
+            }).catch(e => {
+                err = `${formatTime(now)} ${e.host}:${e.port} 发生错误：${e.error}`;
+                win.webContents.send('error', err);
+            });
         });
     
-        return SOCKETS;
+        return true;
     }
 
     async function handleServiceStop(event, args) {
-        for (let index = 0; index < SERVERS.length; index++) {
-            const srv = SERVERS[index];
+        while (SERVERS.length > 0) {
+            const now = new Date();
+            const server = SERVERS.pop();
+            const host = server.address().address;
+            const port = server.address().port;
 
-            SOCKETS[index] = { ...SOCKETS[index], listen: 0, error : 0};
-
-            srv.close();
+            server.close();
+            const msg = `${formatTime(now)} ${host}:${port} 监听结束！`;
+            win.webContents.send('message', msg);
         }
-    
-        return SOCKETS;
+        return true;
+    }
+
+    async function serverListen(arg) {
+        return new Promise((resolve, reject) => {
+            let { port, host } = arg;
+            const server = net.createServer();
+            server.on('connection', (socket) => connection(socket));
+            server.on('error', (e) => {
+                reject({ ...arg, listen: 0, error: e.message});
+            });
+            server.listen(port, host, () => {
+                SERVERS.push(server);
+                const result = { ...arg, listen: 1, error: 0 };
+                resolve(result);
+            });
+            
+        });
     }
 
 })
-
 
 function connection(socket) {
     const { address, port } = socket.address();
 
     socket.on('data', function (request) {
+        let now = new Date();
 		let req = Buffer.from(request);
         let res;
 
-        let msg = `${address}:${port} REC. ${bufToHex(req, '-')}`;
+        let msg = `${formatTime(now)} ${address}:${port} 接收: ${bufToHex(req, '-')}`;
         win.webContents.send('message', msg);
 
 		const addr = socket.address();
@@ -95,19 +119,20 @@ function connection(socket) {
 				const reqBody = JSON.stringify(req.toString());
 				res = Buffer.from([ 0xB2, 0x0e, chn, cnn, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00  ]);
 			}
+            now = new Date();
             socket.write(res);
-		} else {
+
+            msg = `${formatTime(now)} ${address}:${port} 发送: ${bufToHex(res, '-')}`;
+            win.webContents.send('message', msg);
+            } else {
 		}
 		
-        msg = `${address}:${port} SEN. ${bufToHex(res, '-')}`;
-        win.webContents.send('message', msg);
 		
 	});
     
 	socket.on('error', (err) => {
-		// console.log("Caught flash policy server socket error: ");
-		// console.log(err.stack);
-        let msg = `${address}:${port} ERR. ${err.stack.toString()}`;
+        const now = new Date();
+        let msg = `${formatTime(now)} ${address}:${port} 发生错误: ${err.toString()}`;
         win.webContents.send('message', msg);
 	});
 }
@@ -165,4 +190,25 @@ function stringToHex (str) {
     
     return val;
 }
- 
+
+function formatDateTime(date) {
+    const year = date.getFullYear();
+    const month = date.getMonth() + 1;
+    const day = date.getDate();
+    const hour = date.getHours();
+    const minute = date.getMinutes();
+    const second = date.getSeconds();
+    return `${year}-${pad(month)}-${pad(day)} ${pad(hour)}:${pad(minute)}:${pad(second)}`;
+}
+
+function formatTime(date) {
+    const hour = date.getHours();
+    const minute = date.getMinutes();
+    const second = date.getSeconds();
+    const milli = date.getMilliseconds();
+    return `${pad(hour)}:${pad(minute)}:${pad(second)}.${pad(milli,3)}`;
+}
+
+function pad(num, len = 2) {
+    return num.toString().padStart(len, '0');
+}
