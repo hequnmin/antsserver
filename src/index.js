@@ -20,7 +20,7 @@ console.log = function (message) {
     } else {
         logger.innerHTML += message + '<br />';
     }
-    logView.scrollTop = logger.scrollTop = logView.scrollHeight;
+    // logView.scrollTop = logger.scrollTop = logView.scrollHeight;
 }
 
 console.error = function (err) {
@@ -29,7 +29,7 @@ console.error = function (err) {
     } else {
         logger.innerHTML += '<font color="#FF0000">' + err + '</font><br />';
     }
-    logView.scrollTop = logger.scrollTop = logView.scrollHeight;
+    // logView.scrollTop = logger.scrollTop = logView.scrollHeight;
 }
 
 
