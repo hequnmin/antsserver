@@ -27,3 +27,20 @@ body {
 #log {
     height: 100%;
 }
+/* 滚动条样式 */
+#logview::-webkit-scrollbar{
+    width: 8px;
+  }
+  #logview::-webkit-scrollbar-track {
+    background-color: #f1f1f1;
+  }
+  
+  #logview::-webkit-scrollbar-thumb {
+    background-color: #888;
+    border-radius: 5px;
+  }
+  
+  #logview::-webkit-scrollbar-thumb:hover {
+    background-color: #555;
+    border-radius: 5px;
+  }

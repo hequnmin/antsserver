@@ -11,7 +11,7 @@ const txtHost = document.getElementById('txtHost');
 const txtPortFrom = document.getElementById('txtPortFrom');
 const txtPortTo = document.getElementById('txtPortTo');
 
-
+const logview = document.getElementById('logview');
 // 将console.log打印至页面
 const logger = document.getElementById('log');
 console.log = function (message) {
@@ -20,6 +20,7 @@ console.log = function (message) {
     } else {
         logger.innerHTML += message + '<br />';
     }
+    logview.scrollTop = logview.scrollHeight;
 }
 
 console.error = function (message) {
@@ -28,6 +29,7 @@ console.error = function (message) {
     } else {
         logger.innerHTML += '<font color="#FF0000">' + message + '</font><br />';
     }
+    logview.scrollTop = logview.scrollHeight;
 }
 
 
