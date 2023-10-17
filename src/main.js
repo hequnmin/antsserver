@@ -4,6 +4,7 @@ const net = require('net');
 const Buffer = require('buffer').Buffer;
 const path = require('path');
 const { request } = require('http');
+const { Console } = require('console');
 
 let win;
 let SERVERS = [];
@@ -99,6 +100,10 @@ app.whenReady().then(() => {
 function connection(socket) {
     const { address, port } = socket.address();
 
+    const now = new Date();
+    const msg = `${formatTime(now)} ${address}:${port} 客户端已连接!`;
+    win.webContents.send('message', msg);
+
     socket.on('data', function (request) {
         let now = new Date();
 		let req = Buffer.from(request);
@@ -107,7 +112,7 @@ function connection(socket) {
         let msg = `${formatTime(now)} ${address}:${port} 接收: ${bufToHex(req, '-')}`;
         win.webContents.send('message', msg);
 
-		const addr = socket.address();
+        const addr = socket.address();
 		let chn = addr.port % 100;
 		let cnn = chn;
 		
@@ -128,10 +133,14 @@ function connection(socket) {
             win.webContents.send('message', msg);
             } else {
 		}
-		
-		
 	});
-    
+
+    socket.on('close', () => {
+        let now = new Date();
+        const msg = `${formatTime(now)} ${address}:${port} 客户端已断开!`;
+        win.webContents.send('message', msg);
+    });
+
 	socket.on('error', (err) => {
         const now = new Date();
         let msg = `${formatTime(now)} ${address}:${port} 发生错误: ${err.toString()}`;
