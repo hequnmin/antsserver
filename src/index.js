@@ -42,6 +42,7 @@ _start.addEventListener('click', () => {
     const host = txtHost.value;
     const portFrom = parseInt(txtPortFrom.value);
     const portTo = parseInt(txtPortTo.value);
+    const avioAVE = chkAvioAVE.checked;
 
     allowEdit(false);
 
@@ -51,6 +52,7 @@ _start.addEventListener('click', () => {
         args = [ ... args, arg];
     }
 
+    args = { hosts: args, avioAVE };        // 传递参数
     const promise = window.serviceAPI.start(args);
     promise.then(result => {
         const msg = `服务启动...`
@@ -70,6 +72,8 @@ function allowEdit(allow) {
     txtHost.disabled = !allow;
     txtPortFrom.disabled = !allow;
     txtPortTo.disabled = !allow;
+
+    chkAvioAVE.disabled = !allow;
 }
 
 

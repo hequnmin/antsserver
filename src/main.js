@@ -46,11 +46,12 @@ app.whenReady().then(() => {
     })
 
     async function handleServiceStart(event, args) {
-
-        args.forEach(arg => {
+        const { hosts, avioAVE } = args;
+        hosts.forEach(arg => {
             const now = new Date();
             const server = net.createServer();
-            serverListen(arg).then(result => {
+            //serverListen(arg).then(result => {
+            serverListen({...arg, avioAVE}).then(result => {
                 if (result) {
                     const msg = `${formatTime(now)} ${arg.host}:${arg.port} 监听开始...`;
                     win.webContents.send('message', msg);
@@ -91,7 +92,6 @@ app.whenReady().then(() => {
                 const result = { ...arg, listen: 1, error: 0 };
                 resolve(result);
             });
-            
         });
     }
 
@@ -146,6 +146,19 @@ function connection(socket) {
         let msg = `${formatTime(now)} ${address}:${port} 发生错误: ${err.toString()}`;
         win.webContents.send('message', msg);
 	});
+
+    setInterval(() => {
+        const now = new Date();
+
+        let ave = 'AVE 0704,0516,00363AVE 0694,0515,00357';
+        let res = Buffer.from(ave);
+        socket.write(res);
+        let cr = Buffer.from([0x0d]);
+        socket.write(cr);
+
+        let msg = `${formatTime(now)} ${address}:${port} 发送: ${ave}`;
+        win.webContents.send('message', msg);
+    }, 3000);
 }
 
 function isJsonString(value) {
