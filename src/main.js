@@ -153,12 +153,18 @@ function connection(socket) {
         let ave = 'AVE 0704,0516,00363AVE 0694,0515,00357';
         let res = Buffer.from(ave);
         socket.write(res);
-        let cr = Buffer.from([0x0d]);
-        socket.write(cr);
+        // let cr = Buffer.from([0x0d]);
+        // socket.write(cr);
+
+        const span = Math.floor(Math.random() * 101);
+        setTimeout(()=>{
+            let cr = Buffer.from([0x0d]);
+            socket.write(cr);
+        }, span);
 
         let msg = `${formatTime(now)} ${address}:${port} 发送: ${ave}`;
         win.webContents.send('message', msg);
-    }, 3000);
+    }, 1000);
 }
 
 function isJsonString(value) {
