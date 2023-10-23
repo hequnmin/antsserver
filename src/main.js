@@ -150,7 +150,16 @@ function connection(socket) {
     setInterval(() => {
         const now = new Date();
 
-        let ave = 'AVE 0704,0516,00363AVE 0694,0515,00357';
+        //let ave = 'AVE 0704,0516,00363AVE 0694,0515,00357';
+        let ampere1 = 700 + Math.floor(Math.random() * 21);
+        let ampere2 = 700 + Math.floor(Math.random() * 21);
+        let volt1 = 500 + Math.floor(Math.random() * 21);
+        let volt2 = 500 + Math.floor(Math.random() * 21);
+        let energy1 = Math.floor((ampere1 * volt1) / 1000);
+        let energy2 = Math.floor((ampere2 * volt2) / 1000);
+
+        let ave = `AVE ${ampere1},${volt1},${energy1}AVE ${ampere2},${volt2},${energy2}`;
+
         let res = Buffer.from(ave);
         socket.write(res);
         // let cr = Buffer.from([0x0d]);
